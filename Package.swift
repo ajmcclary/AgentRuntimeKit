@@ -19,14 +19,24 @@ import PackageDescription
 // (Codex/Claude/OpenCode/ACP layers sit above this package).
 //
 // Zero package dependencies (Foundation plus the CryptoKit system
-// framework for SHA-256 stable-interaction identities). Swift 5 language
-// mode keeps the moved code byte-behaviorally identical (RepoPromptCore /
-// WorkspaceKit promoted-target precedent).
+// framework for SHA-256 stable-interaction identities). Swift 6 language
+// mode with strict concurrency: the domain is pure value types plus
+// caseless policy namespaces, so it compiles clean with zero concurrency
+// escape hatches — no @unchecked Sendable, @preconcurrency, or
+// nonisolated(unsafe) anywhere in the target.
+
+// Workspace-standard Swift 6 settings. Applied to every Swift target and
+// test target so the language-mode policy is checkable per target.
+let swiftSettings: [SwiftSetting] = [
+    .swiftLanguageMode(.v6),
+    .enableExperimentalFeature("StrictConcurrency")
+]
+
 let package = Package(
     name: "AgentRuntimeKit",
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17)
+        .macOS("27.0"),
+        .iOS("27.0")
     ],
     products: [
         .library(name: "AgentRuntimeKit", targets: ["AgentRuntimeKit"])
@@ -34,12 +44,12 @@ let package = Package(
     targets: [
         .target(
             name: "AgentRuntimeKit",
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "AgentRuntimeKitTests",
             dependencies: ["AgentRuntimeKit"],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: swiftSettings
         )
     ]
 )
