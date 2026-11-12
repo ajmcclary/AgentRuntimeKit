@@ -24,4 +24,24 @@ final class AgentModelSelectionIDTests: XCTestCase {
 		XCTAssertNil(AgentModelSelectionID.parse(""))
 		XCTAssertNil(AgentModelSelectionID.parse("no-colon"))
 	}
+
+	func testParseLegacyFormatRejectsBlankOrColonBearingDecodedSegmentsWithoutTrapping() {
+		// Decodes to a space (blank after trimming).
+		XCTAssertNil(AgentModelSelectionID.parse("agent-selection:v1:%20:x"))
+		XCTAssertNil(AgentModelSelectionID.parse("agent-selection:v1:x:%20%0A"))
+		// Decodes to an agent containing ':'.
+		XCTAssertNil(AgentModelSelectionID.parse("agent-selection:v1:a%3Ab:x"))
+		// Percent-encoded surrounding whitespace is trimmed, not rejected.
+		let id = AgentModelSelectionID.parse("agent-selection:v1:%20codexExec:default%20")
+		XCTAssertEqual(id?.agentRaw, "codexExec")
+		XCTAssertEqual(id?.modelRaw, "default")
+	}
+
+	func testValidatingInitializerReturnsNilInsteadOfTrapping() {
+		XCTAssertNil(AgentModelSelectionID(validatingAgentRaw: "  ", modelRaw: "x"))
+		XCTAssertNil(AgentModelSelectionID(validatingAgentRaw: "x", modelRaw: "\n"))
+		XCTAssertNil(AgentModelSelectionID(validatingAgentRaw: "a:b", modelRaw: "x"))
+		let id = AgentModelSelectionID(validatingAgentRaw: " claudeCode ", modelRaw: " opus:1m ")
+		XCTAssertEqual(id?.rawValue, "claudeCode:opus:1m")
+	}
 }

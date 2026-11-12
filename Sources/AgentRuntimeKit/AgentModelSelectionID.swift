@@ -27,12 +27,30 @@ public struct AgentModelSelectionID: Sendable, Equatable, Hashable, CustomString
 
 	/// Creates a selection ID from an agent raw value and a model raw value.
 	/// Both must be non-empty after trimming. Agent raw must not contain `:`.
+	///
+	/// Traps when those rules are broken, so use it only for programmer-supplied
+	/// constants. Text from outside the process (MCP arguments, persisted values,
+	/// discovered model ids) goes through ``init(validatingAgentRaw:modelRaw:)``
+	/// or ``parse(_:)``, which return `nil` instead.
 	public init(agentRaw: String, modelRaw: String) {
+		guard let validated = Self(validatingAgentRaw: agentRaw, modelRaw: modelRaw) else {
+			let trimmedAgent = agentRaw.trimmingCharacters(in: .whitespacesAndNewlines)
+			let trimmedModel = modelRaw.trimmingCharacters(in: .whitespacesAndNewlines)
+			precondition(!trimmedAgent.isEmpty, "agentRaw must be non-empty")
+			precondition(!trimmedModel.isEmpty, "modelRaw must be non-empty")
+			preconditionFailure("agentRaw must not contain ':'")
+		}
+		self = validated
+	}
+
+	/// Creates a selection ID from untrusted text, returning `nil` when either
+	/// value is blank after trimming or the agent value contains `:`.
+	public init?(validatingAgentRaw agentRaw: String, modelRaw: String) {
 		let trimmedAgent = agentRaw.trimmingCharacters(in: .whitespacesAndNewlines)
 		let trimmedModel = modelRaw.trimmingCharacters(in: .whitespacesAndNewlines)
-		precondition(!trimmedAgent.isEmpty, "agentRaw must be non-empty")
-		precondition(!trimmedModel.isEmpty, "modelRaw must be non-empty")
-		precondition(!trimmedAgent.contains(":"), "agentRaw must not contain ':'")
+		guard !trimmedAgent.isEmpty,
+				!trimmedModel.isEmpty,
+				!trimmedAgent.contains(":") else { return nil }
 		self.agentRaw = trimmedAgent
 		self.modelRaw = trimmedModel
 	}
@@ -65,7 +83,7 @@ public struct AgentModelSelectionID: Sendable, Equatable, Hashable, CustomString
 			.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard !agent.isEmpty, !model.isEmpty else { return nil }
 
-		return AgentModelSelectionID(agentRaw: agent, modelRaw: model)
+		return AgentModelSelectionID(validatingAgentRaw: agent, modelRaw: model)
 	}
 
 	/// Parses the legacy `agent-selection:v1:<encoded-agent>:<encoded-model>` format.
@@ -77,8 +95,9 @@ public struct AgentModelSelectionID: Sendable, Equatable, Hashable, CustomString
 
 		let agent = segments[2].removingPercentEncoding ?? segments[2]
 		let model = segments[3].removingPercentEncoding ?? segments[3]
-		guard !agent.isEmpty, !model.isEmpty else { return nil }
 
-		return AgentModelSelectionID(agentRaw: agent, modelRaw: model)
+		// Decoded segments are untrusted: they may be blank after trimming or
+		// carry a ':' in the agent, so validate rather than trap.
+		return AgentModelSelectionID(validatingAgentRaw: agent, modelRaw: model)
 	}
 }
