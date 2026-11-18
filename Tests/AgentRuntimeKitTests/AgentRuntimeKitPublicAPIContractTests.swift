@@ -20,7 +20,7 @@ final class AgentRuntimeKitPublicAPIContractTests: XCTestCase {
 	private typealias InteractionFamily = (AgentAskUserInteraction, AgentAskUserQuestion, AgentAskUserResponse, AgentRequestUserInputRequest, AgentRequestUserInputResponse, UserQuestionResponse, UserInstructionResponse)
 	private typealias WorkflowFamily = (AgentWorkflow, AgentWorkflowDefinition)
 	private typealias IdentifierFamily = (AgentModelSelectionID, AgentProviderBindingID, AgentApprovalRequestID, CodexAppServerRequestID)
-	private typealias PolicyFamily = (AgentTaggedPathParser, AgentTurnMessageComposition, AgentTranscriptTextExtraction, AgentTranscriptDurableFrontierSupport, SlashSkillTokenizer, PendingSlashSkillInvocationEnvelope, ClaudeAbortArtifactFilter, PerKeyTaskStore<String>)
+	private typealias PolicyFamily = (AgentTaggedPathParser, AgentTurnMessageComposition, AgentTranscriptTextExtraction, AgentTranscriptDurableFrontierSupport, SlashSkillTokenizer, PendingSlashSkillInvocationEnvelope, PerKeyTaskStore<String>)
 
 	func testRunStateRawIdentitySurvivesCodableRoundTrip() throws {
 		// AgentSessionRunState raw strings are persisted session identity.

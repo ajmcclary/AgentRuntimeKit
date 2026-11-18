@@ -34,12 +34,11 @@ all depend on it.
   mentions), `AgentTurnMessageComposition` (initial-thread and session-handoff payloads),
   `PendingSlashSkillInvocationEnvelopeCodec`.
 - **Utilities** — `PerKeyTaskStore` (a `@MainActor` per-key `Task` registry whose removal tokens
-  stop a stale worker from evicting its replacement) and `ClaudeAbortArtifactFilter`.
+  stop a stale worker from evicting its replacement).
 
 ### Provider-specific names in a neutral package
 
-A few names here mention a provider or the original app. They are known, and two are
-deliberate:
+A few names here mention a provider or the original app. They are deliberate:
 
 - `AgentApprovalRequestID` has `.codex`, `.claudeControl` and `.acp` cases. It is a routing
   tag: a neutral approval request must carry the provider's own request ID so the reply
@@ -48,9 +47,6 @@ deliberate:
 - `PendingSlashSkillInvocationEnvelopeCodec.prefix` (`{{REPOPROMPT_PENDING_SLASH_SKILL_BASE64:`)
   is a marker embedded in message text. Renaming it would stop existing envelopes from
   decoding, so it stays as is.
-- `ClaudeAbortArtifactFilter` is Claude-specific string matching that belongs in
-  ClaudeRuntimeKit. Moving it is a breaking change for its consumers and is planned as a
-  separate release.
 
 ## When to use it
 
@@ -76,9 +72,9 @@ deliberate:
 
 ```swift
 dependencies: [
-    // 0.1.0-beta.3 is a prerelease identifier — SwiftPM only resolves
+    // 0.1.0-beta.4 is a prerelease identifier — SwiftPM only resolves
     // prerelease tags when the lower bound itself names one.
-    .package(url: "https://github.com/ajmcclary/AgentRuntimeKit.git", .upToNextMinor(from: "0.1.0-beta.3"))
+    .package(url: "https://github.com/ajmcclary/AgentRuntimeKit.git", .upToNextMinor(from: "0.1.0-beta.4"))
 ]
 ```
 
